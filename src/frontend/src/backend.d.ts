@@ -25,10 +25,29 @@ export interface Data {
     mobileNumber: string;
     image?: ExternalBlob;
 }
+export interface UserProfile {
+    name: string;
+}
+export enum UserRole {
+    admin = "admin",
+    user = "user",
+    guest = "guest"
+}
 export interface backendInterface {
+    assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     create(personId: string, payload: Data): Promise<Data>;
+    createPersonalRecord(payload: Data): Promise<Data>;
     delete_(personId: string): Promise<void>;
-    listAll(): Promise<Array<Data>>;
-    read(personId: string): Promise<Data>;
+    deletePersonalRecord(): Promise<void>;
+    getCallerUserProfile(): Promise<UserProfile | null>;
+    getCallerUserRole(): Promise<UserRole>;
+    getPersonalRecordByUser(user: Principal): Promise<Data | null>;
+    getUserProfile(user: Principal): Promise<UserProfile | null>;
+    isCallerAdmin(): Promise<boolean>;
+    listAllAdmin(): Promise<Array<Data>>;
+    readAdmin(personId: string): Promise<Data>;
+    readPersonalRecord(): Promise<Data | null>;
+    saveCallerUserProfile(profile: UserProfile): Promise<void>;
     update(personId: string, payload: Data): Promise<Data>;
+    updatePersonalRecord(payload: Data): Promise<Data>;
 }

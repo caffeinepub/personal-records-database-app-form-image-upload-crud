@@ -1,58 +1,85 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-15T10:45:31.964Z",
+  "generatedAt": "2026-02-15T12:03:08.820Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
+    "total": 4,
     "implemented": 2,
     "items": [
       {
-        "id": "REQ-10",
-        "summary": "Update backend validation for the height field to treat the stored height value as inches, including updating the allowed numeric range and the trap error message to reference inches.",
+        "id": "REQ-1",
+        "summary": "Create a separate backend storage boundary for “personal records” that is not shared with the Admin Panel’s record storage, and expose dedicated APIs for users to manage only their own personal records.",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-8",
-        "summary": "Update the UI to use inches for the height field instead of centimeters, including the height input label in the record create/edit form and the height unit displayed in the record detail view.",
+        "id": "REQ-2",
+        "summary": "Update the frontend so the Admin Panel no longer displays or manages the personal records database; instead, implement a separate “Personal Records” experience outside the Admin Panel for signed-in users.",
         "status": "implemented",
         "plannedFiles": [
+          "frontend/src/App.tsx",
+          "frontend/src/features/records/RecordsPage.tsx",
+          "frontend/src/components/PersonalRecords/AuthButton.tsx",
+          "frontend/src/components/PersonalRecords/SignInGate.tsx",
+          "frontend/src/components/AppLayout.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/features/records/RecordsPage.tsx",
+          "frontend/src/components/PersonalRecords/AuthButton.tsx",
+          "frontend/src/components/PersonalRecords/SignInGate.tsx"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Add/adjust React Query hooks and mutations to support personal-record CRUD outside the Admin Panel, with correct cache keys and optimistic/refresh behavior similar to the existing admin-record flows.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/features/personalRecords/queries.ts",
+          "frontend/src/features/personalRecords/mutations.ts",
+          "frontend/src/features/records/mutations.ts",
           "frontend/src/features/records/RecordForm.tsx",
           "frontend/src/features/records/RecordDetail.tsx"
         ],
         "matchedFiles": [
+          "frontend/src/features/personalRecords/queries.ts",
+          "frontend/src/features/personalRecords/mutations.ts",
+          "frontend/src/features/records/mutations.ts",
           "frontend/src/features/records/RecordForm.tsx",
           "frontend/src/features/records/RecordDetail.tsx"
         ]
       },
       {
-        "id": "REQ-9",
-        "summary": "Update frontend validation for the height field to validate inches (not centimeters), including updating the allowed numeric range and the validation error message to reference inches.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/features/records/validators.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/features/records/validators.ts"
-        ]
+        "id": "REQ-4",
+        "summary": "If the backend data schema changes in a way that would otherwise drop or orphan existing stored records, add a conditional Motoko migration to preserve existing data into the appropriate new store(s).",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
       }
     ]
   },
   "changedFiles": [
     "backend/main.mo",
     "build-request.json",
-    "build-template/README.md",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/PersonalRecords/AuthButton.tsx",
+    "frontend/src/components/PersonalRecords/SignInGate.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/features/personalRecords/mutations.ts",
+    "frontend/src/features/personalRecords/queries.ts",
     "frontend/src/features/records/RecordDetail.tsx",
     "frontend/src/features/records/RecordForm.tsx",
-    "frontend/src/features/records/validators.ts",
+    "frontend/src/features/records/RecordsPage.tsx",
+    "frontend/src/features/records/mutations.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

@@ -1,42 +1,78 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Switch record height UI and validation from centimeters to inches",
+  "title": "Personal Records experience separated from Admin Panel (frontend)",
   "requirements": [
     {
-      "id": "REQ-8",
-      "summary": "Update height field UI text to use inches in the create/edit form and record detail view.",
+      "id": "REQ-2",
+      "summary": "Move personal-record management out of the Admin Panel into a dedicated signed-in Personal Records experience, while keeping Admin Panel admin-only.",
       "acceptanceCriteria": [
-        "In the record form, the height label reads \"Height (in)\" (or \"Height (inches)\") instead of \"Height (cm)\".",
-        "In the record detail view, the height value is displayed with an inches suffix (e.g., \"70 in\") instead of centimeters.",
-        "No other field labels/units are changed."
+        "Admin Panel UI only uses admin-only record queries/mutations and does not call personal-record APIs.",
+        "The non-admin area (Records view) provides a user-facing UI to view and manage the signed-in user’s personal records (list + detail + create/edit/delete) using the new personal-record APIs.",
+        "If the user is not signed in (Internet Identity), the Records view shows a clear sign-in prompt and does not show any records.",
+        "User-facing text is in English."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/features/records/RecordForm.tsx",
+          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Change the height input label from centimeters to inches (e.g., update \"Height (cm)\" to \"Height (in)\"). Keep all other field labels/units unchanged."
+          "description": "Wire the Records view to render the new Personal Records experience instead of the current static admin-only message page; keep Admin Panel navigation intact so Admin Panel remains separate from Personal Records."
         },
         {
-          "path": "frontend/src/features/records/RecordDetail.tsx",
+          "path": "frontend/src/features/records/RecordsPage.tsx",
           "operation": "modify",
-          "description": "Update the height display suffix from \"cm\" to \"in\" in the record detail view. Do not change any other displayed units (e.g., weight stays \"kg\")."
+          "description": "Replace the current admin-only explanatory content with a Personal Records page that: (1) shows a clear Internet Identity sign-in prompt when unauthenticated, and (2) when authenticated, renders the personal-record list/detail and create/edit/delete UI. Use the authorization system via the existing Internet Identity hook (selected component: authorization) for gated access; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/PersonalRecords/AuthButton.tsx",
+          "operation": "create",
+          "description": "Add a reusable login/logout button for the Personal Records page using the existing Internet Identity hook and clearing React Query cache on logout (selected component: authorization). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/PersonalRecords/SignInGate.tsx",
+          "operation": "create",
+          "description": "Create a small wrapper component that shows the sign-in prompt (with AuthButton) when the user is not authenticated, and renders children only when authenticated (selected component: authorization). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/AppLayout.tsx",
+          "operation": "modify",
+          "description": "Adjust header/subtitle wording if needed so the primary non-admin experience is clearly 'Personal Records' (English-only copy), without introducing new top-level routes."
         }
       ]
     },
     {
-      "id": "REQ-9",
-      "summary": "Update frontend height validation to validate inches (range + error message), while keeping height optional and non-numeric messaging unchanged.",
+      "id": "REQ-3",
+      "summary": "Add dedicated React Query hooks/mutations for personal-record CRUD with separate cache keys and smooth UI updates + graceful authorization error handling.",
       "acceptanceCriteria": [
-        "Submitting a height value outside the new inches range shows a height validation error that references inches (not centimeters).",
-        "Submitting a non-numeric height continues to show \"Height must be a number\".",
-        "Height remains optional (empty height is allowed)."
+        "There are separate React Query cache keys for admin records and personal records (no shared cache keys).",
+        "Creating/updating a personal record immediately reflects in the personal records list and the selected detail view without requiring a manual reload.",
+        "Authorization errors for personal-record actions are handled gracefully in the UI (English messaging)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/features/records/validators.ts",
+          "path": "frontend/src/features/personalRecords/queries.ts",
+          "operation": "create",
+          "description": "Implement React Query hooks for personal records that call the backend personal-record capabilities (e.g., reading the caller’s personal record) using cache keys that are distinct from admin records (e.g., not ['admin-records']). Ensure hooks are enabled only when an actor is available and the user is authenticated (selected component: authorization). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/personalRecords/mutations.ts",
+          "operation": "create",
+          "description": "Implement React Query mutations for create/update/delete personal record using the backend personal-record capabilities, with separate cache keys and optimistic/update-on-success behavior so list + detail refresh immediately. Handle authorization failures gracefully (English) (selected components: authorization, blob-storage for ExternalBlob image uploads via direct URL). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/records/mutations.ts",
           "operation": "modify",
-          "description": "Update height validation to treat the input as inches (not centimeters): adjust the allowed numeric range to an inches-appropriate range (e.g., 31–98) and update the range validation error message to reference inches (\"in\"/\"inches\"). Keep the non-numeric message exactly \"Height must be a number\" and keep height optional."
+          "description": "Keep existing mutations explicitly scoped to admin-record flows only; ensure they continue to update only the admin cache key(s) and do not share personal-record cache keys (no cross-invalidation)."
+        },
+        {
+          "path": "frontend/src/features/records/RecordForm.tsx",
+          "operation": "modify",
+          "description": "Make the form usable for both admin and personal flows by allowing the parent page to control submit behavior and error messaging; ensure displayed messages remain English and do not assume admin-only authorization on failure."
+        },
+        {
+          "path": "frontend/src/features/records/RecordDetail.tsx",
+          "operation": "modify",
+          "description": "Ensure detail rendering supports personal-record usage (e.g., readOnly mode when appropriate) and that authorization/failed action states can be surfaced cleanly by the parent page (English-only messaging)."
         }
       ]
     }

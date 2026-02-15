@@ -22,6 +22,10 @@ export interface Data {
   'image' : [] | [ExternalBlob],
 }
 export type ExternalBlob = Uint8Array;
+export interface UserProfile { 'name' : string }
+export type UserRole = { 'admin' : null } |
+  { 'user' : null } |
+  { 'guest' : null };
 export interface _CaffeineStorageCreateCertificateResult {
   'method' : string,
   'blob_hash' : string,
@@ -49,11 +53,23 @@ export interface _SERVICE {
     _CaffeineStorageRefillResult
   >,
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
+  '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
+  'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'create' : ActorMethod<[string, Data], Data>,
+  'createPersonalRecord' : ActorMethod<[Data], Data>,
   'delete' : ActorMethod<[string], undefined>,
-  'listAll' : ActorMethod<[], Array<Data>>,
-  'read' : ActorMethod<[string], Data>,
+  'deletePersonalRecord' : ActorMethod<[], undefined>,
+  'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
+  'getCallerUserRole' : ActorMethod<[], UserRole>,
+  'getPersonalRecordByUser' : ActorMethod<[Principal], [] | [Data]>,
+  'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
+  'isCallerAdmin' : ActorMethod<[], boolean>,
+  'listAllAdmin' : ActorMethod<[], Array<Data>>,
+  'readAdmin' : ActorMethod<[string], Data>,
+  'readPersonalRecord' : ActorMethod<[], [] | [Data]>,
+  'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'update' : ActorMethod<[string, Data], Data>,
+  'updatePersonalRecord' : ActorMethod<[Data], Data>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

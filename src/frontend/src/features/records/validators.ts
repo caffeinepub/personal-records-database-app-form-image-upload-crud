@@ -43,8 +43,8 @@ export function validateRecordForm(data: {
     const heightNum = parseInt(data.height, 10);
     if (isNaN(heightNum)) {
       errors.push({ field: 'height', message: 'Height must be a number' });
-    } else if (heightNum < 31 || heightNum > 98) {
-      errors.push({ field: 'height', message: 'Height must be between 31 and 98 inches' });
+    } else if (heightNum < 80 || heightNum > 250) {
+      errors.push({ field: 'height', message: 'Height must be between 80 and 250 cm' });
     }
   }
 

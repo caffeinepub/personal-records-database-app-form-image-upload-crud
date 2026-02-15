@@ -1,84 +1,93 @@
 {
   "kind": "build_request",
-  "title": "Change height field from centimeters to inches",
+  "title": "Separate personal records database from the Admin Panel",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-8",
-      "text": "Update the UI to use inches for the height field instead of centimeters, including the height input label in the record create/edit form and the height unit displayed in the record detail view.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-user-1"
-        ],
-        "quotes": [
-          "height ko cm se nikal ke Inch kardo"
-        ]
-      },
-      "acceptanceCriteria": [
-        "In the record form, the height label reads \"Height (in)\" (or \"Height (inches)\") instead of \"Height (cm)\".",
-        "In the record detail view, the height value is displayed with an inches suffix (e.g., \"70 in\") instead of centimeters.",
-        "No other field labels/units are changed."
-      ]
-    },
-    {
-      "id": "REQ-9",
-      "text": "Update frontend validation for the height field to validate inches (not centimeters), including updating the allowed numeric range and the validation error message to reference inches.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-user-1"
-        ],
-        "quotes": [
-          "height ko cm se nikal ke Inch kardo"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Submitting a height value outside the new inches range shows a height validation error that references inches (not centimeters).",
-        "Submitting a non-numeric height continues to show \"Height must be a number\".",
-        "Height remains optional (empty height is allowed)."
-      ]
-    },
-    {
-      "id": "REQ-10",
-      "text": "Update backend validation for the height field to treat the stored height value as inches, including updating the allowed numeric range and the trap error message to reference inches.",
+      "id": "REQ-1",
+      "text": "Create a separate backend storage boundary for “personal records” that is not shared with the Admin Panel’s record storage, and expose dedicated APIs for users to manage only their own personal records.",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-user-1"
+          "msg-4"
         ],
         "quotes": [
-          "height ko cm se nikal ke Inch kardo"
+          "personal records database ko admin panal ke bahar rakho"
         ]
       },
       "acceptanceCriteria": [
-        "Creating or updating a record with a height outside the new inches range traps with an error message that references inches (not centimeters).",
-        "Creating or updating a record with a valid height in inches succeeds and the stored value is returned unchanged.",
-        "No changes are made to other backend validation rules (e.g., weight, mobile number, date of birth)."
+        "Backend has two distinct record stores (e.g., admin-records vs personal-records) and they do not read/write the same underlying Map.",
+        "Personal-record APIs are scoped to the caller identity (Principal) so one user cannot list/read/update/delete another user’s records.",
+        "Personal-record APIs reject unauthenticated/unauthorized callers with clear errors (e.g., \"Unauthorized\").",
+        "Admin Panel APIs continue to exist and operate only on the admin record store (not personal-record store)."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Update the frontend so the Admin Panel no longer displays or manages the personal records database; instead, implement a separate “Personal Records” experience outside the Admin Panel for signed-in users.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "personal records database ko admin panal ke bahar rakho"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Admin Panel UI only uses admin-only record queries/mutations and does not call personal-record APIs.",
+        "The non-admin area (Records view) provides a user-facing UI to view and manage the signed-in user’s personal records (list + detail + create/edit/delete) using the new personal-record APIs.",
+        "If the user is not signed in (Internet Identity), the Records view shows a clear sign-in prompt and does not show any records.",
+        "User-facing text is in English."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Add/adjust React Query hooks and mutations to support personal-record CRUD outside the Admin Panel, with correct cache keys and optimistic/refresh behavior similar to the existing admin-record flows.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "personal records database ko admin panal ke bahar rakho"
+        ]
+      },
+      "acceptanceCriteria": [
+        "There are separate React Query cache keys for admin records and personal records (no shared cache keys).",
+        "Creating/updating a personal record immediately reflects in the personal records list and the selected detail view without requiring a manual reload.",
+        "Authorization errors for personal-record actions are handled gracefully in the UI (English messaging)."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "If the backend data schema changes in a way that would otherwise drop or orphan existing stored records, add a conditional Motoko migration to preserve existing data into the appropriate new store(s).",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "personal records database ko admin panal ke bahar rakho"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Upgrade does not trap due to incompatible stable state changes.",
+        "Existing stored records (if any) are preserved after upgrade according to the new separation model, or explicitly moved into the intended store."
       ]
     }
   ],
   "constraints": [
-    "Do not edit files under frontend/immutablePaths (e.g., frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui).",
-    "Keep all Motoko backend logic in the single actor in backend/main.mo; only add backend/migration.mo if it is strictly necessary for preserving existing stable state."
+    "Do not edit files under frontend/immutablePaths (e.g., frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui). Compose them instead.",
+    "Backend must remain a single Motoko actor in backend/main.mo; only add backend/migration.mo if required for state upgrade compatibility."
   ],
   "nonGoals": [
-    "Adding automatic cm↔in conversion UI toggles or dual-unit display.",
-    "Changing weight units or validation.",
-    "Changing the record schema beyond reinterpreting the height unit."
+    "Implementing third-party authentication providers (only Internet Identity is supported).",
+    "Introducing external databases or off-chain storage.",
+    "Implementing real-time sync (WebSockets) or push notifications."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

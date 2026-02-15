@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { RecordImageField } from './RecordImageField';
-import { validateRecordForm, type ValidationError } from './validators';
+import { validateRecordForm } from './validators';
 import type { RecordFormData } from './types';
 import { Loader2 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
@@ -147,7 +147,7 @@ export function RecordForm({ initialData, onSubmit, onCancel, isSubmitting }: Re
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="height">Height (in)</Label>
+          <Label htmlFor="height">Height (cm)</Label>
           <Input
             id="height"
             type="number"

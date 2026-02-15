@@ -1,18 +1,50 @@
 import Map "mo:core/Map";
 import Text "mo:core/Text";
-import Iter "mo:core/Iter";
 import Runtime "mo:core/Runtime";
 import Array "mo:core/Array";
 import Order "mo:core/Order";
 import Storage "blob-storage/Storage";
 import MixinStorage "blob-storage/Mixin";
 import Char "mo:core/Char";
-import Nat "mo:core/Nat";
 import Int "mo:core/Int";
 import Time "mo:core/Time";
+import Principal "mo:core/Principal";
+import AccessControl "authorization/access-control";
+import MixinAuthorization "authorization/MixinAuthorization";
 
 actor {
+  let accessControlState = AccessControl.initState();
+  include MixinAuthorization(accessControlState);
   include MixinStorage();
+
+  // User profile type for frontend requirements
+  public type UserProfile = {
+    name : Text;
+  };
+
+  let userProfiles = Map.empty<Principal, UserProfile>();
+
+  // User profile management functions required by frontend
+  public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can access profiles");
+    };
+    userProfiles.get(caller);
+  };
+
+  public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
+    if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Can only view your own profile");
+    };
+    userProfiles.get(user);
+  };
+
+  public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can save profiles");
+    };
+    userProfiles.add(caller, profile);
+  };
 
   type Data = {
     name : Text;
@@ -26,7 +58,12 @@ actor {
     image : ?Storage.ExternalBlob;
   };
 
-  let persons = Map.empty<Text, Data>();
+  // SEPARATE STORAGE BOUNDARIES:
+  // 1. Admin Panel storage - only accessible by admins
+  var persons = Map.empty<Text, Data>();
+
+  // 2. Personal Records storage - users manage their own records
+  var personalRecords = Map.empty<Principal, Data>();
 
   module Data {
     public func compare(d1 : Data, d2 : Data) : Order.Order {
@@ -74,63 +111,21 @@ actor {
     payload;
   };
 
-  func validateUpdate(personId : Text, payload : Data) : Data {
-    switch (persons.get(personId)) {
-      case (null) {
-        Runtime.trap("Person with id '" # personId # "' does not exist");
-      };
-      case (?existing) {
-        let validated = {
-          name = validateTextField(payload.name.trim(#char ' '), 3, 100, "1 (name)");
-          mobileNumber = validateMobileNumber(payload.mobileNumber.trim(#char ' '));
-          height = switch (payload.height) {
-            case (null) { existing.height };
-            case (?height) {
-              if (height > 98 or height < 24) {
-                Runtime.trap("Field 5 (height) expects a number between 24 and 98 (inches). Got: " # height.toText());
-              };
-              ?height;
-            };
-          };
-          weight = switch (payload.weight) {
-            case (null) { existing.weight };
-            case (?weight) {
-              if (weight > 400 or weight < 40) {
-                Runtime.trap("Field 6 (weight) expects a number between 40 and 400. Got: " # weight.toText());
-              };
-              ?weight;
-            };
-          };
-          dateOfBirth = validateBirthDate(payload.dateOfBirth.trim(#char ' '));
-          city = payload.city;
-          hobby = payload.hobby;
-          education = payload.education;
-          image = payload.image;
-        };
-        persons.add(personId, validated);
-        validated;
-      };
-    };
-  };
-
-  public shared ({ caller }) func create(personId : Text, payload : Data) : async Data {
-    if (persons.containsKey(personId)) {
-      Runtime.trap("Person with id '" # personId # "' already exists");
-    };
-    let validated = {
+  func validateData(payload : Data, existingHeight : ?Int, existingWeight : ?Int) : Data {
+    {
       name = validateTextField(payload.name.trim(#char ' '), 3, 100, "1 (name)");
       mobileNumber = validateMobileNumber(payload.mobileNumber.trim(#char ' '));
       height = switch (payload.height) {
-        case (null) { null };
+        case (null) { existingHeight };
         case (?height) {
-          if (height > 98 or height < 24) {
-            Runtime.trap("Field 5 (height) expects a number between 24 and 98 (inches). Got: " # height.toText());
+          if (height > 250 or height < 80) {
+            Runtime.trap("Field 5 (height) expects a number between 80 and 250. Got: " # height.toText());
           };
           ?height;
         };
       };
       weight = switch (payload.weight) {
-        case (null) { null };
+        case (null) { existingWeight };
         case (?weight) {
           if (weight > 400 or weight < 40) {
             Runtime.trap("Field 6 (weight) expects a number between 40 and 400. Got: " # weight.toText());
@@ -144,31 +139,124 @@ actor {
       education = payload.education;
       image = payload.image;
     };
+  };
+
+  func validateUpdate(personId : Text, payload : Data) : Data {
+    switch (persons.get(personId)) {
+      case (null) { Runtime.trap("Person with id '" # personId # "' does not exist") };
+      case (?existing) {
+        validateData(payload, existing.height, existing.weight);
+      };
+    };
+  };
+
+  // ============================================
+  // ADMIN PANEL FUNCTIONS (Admin-only access)
+  // ============================================
+
+  public shared ({ caller }) func create(personId : Text, payload : Data) : async Data {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can create person records.");
+    };
+    if (persons.containsKey(personId)) {
+      Runtime.trap("Person with id '" # personId # "' already exists");
+    };
+    let validated = validateData(payload, null, null);
     persons.add(personId, validated);
     validated;
   };
 
   public shared ({ caller }) func update(personId : Text, payload : Data) : async Data {
-    validateUpdate(personId, payload);
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can update person records.");
+    };
+    let validated = validateUpdate(personId, payload);
+    persons.add(personId, validated);
+    validated;
   };
 
   public shared ({ caller }) func delete(personId : Text) : async () {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can delete person records.");
+    };
     if (not persons.containsKey(personId)) {
       Runtime.trap("Person with id '" # personId # "' does not exist");
     };
     persons.remove(personId);
   };
 
-  public query ({ caller }) func read(personId : Text) : async Data {
+  public query ({ caller }) func listAllAdmin() : async [Data] {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can view all records.");
+    };
+    persons.values().toArray().sort();
+  };
+
+  public query ({ caller }) func readAdmin(personId : Text) : async Data {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can view person records.");
+    };
+
     switch (persons.get(personId)) {
-      case (null) {
-        Runtime.trap("Person with id '" # personId # "' does not exist");
-      };
+      case (null) { Runtime.trap("Person with id '" # personId # "' does not exist") };
       case (?person) { person };
     };
   };
 
-  public query ({ caller }) func listAll() : async [Data] {
-    persons.values().toArray().sort();
+  // ============================================
+  // PERSONAL RECORDS FUNCTIONS (User access to own records)
+  // ============================================
+
+  public shared ({ caller }) func createPersonalRecord(payload : Data) : async Data {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can create personal records");
+    };
+    if (personalRecords.containsKey(caller)) {
+      Runtime.trap("Personal record already exists. Use updatePersonalRecord instead.");
+    };
+    let validated = validateData(payload, null, null);
+    personalRecords.add(caller, validated);
+    validated;
+  };
+
+  public shared ({ caller }) func updatePersonalRecord(payload : Data) : async Data {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can update personal records");
+    };
+    switch (personalRecords.get(caller)) {
+      case (null) {
+        Runtime.trap("Personal record does not exist. Use createPersonalRecord first.");
+      };
+      case (?existing) {
+        let validated = validateData(payload, existing.height, existing.weight);
+        personalRecords.add(caller, validated);
+        validated;
+      };
+    };
+  };
+
+  public shared ({ caller }) func deletePersonalRecord() : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can delete personal records");
+    };
+    if (not personalRecords.containsKey(caller)) {
+      Runtime.trap("Personal record does not exist");
+    };
+    personalRecords.remove(caller);
+  };
+
+  public query ({ caller }) func readPersonalRecord() : async ?Data {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can read personal records");
+    };
+    personalRecords.get(caller);
+  };
+
+  public query ({ caller }) func getPersonalRecordByUser(user : Principal) : async ?Data {
+    // Users can only view their own record, admins can view any
+    if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Can only view your own personal record");
+    };
+    personalRecords.get(user);
   };
 };

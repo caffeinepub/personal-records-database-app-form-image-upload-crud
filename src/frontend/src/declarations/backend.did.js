@@ -19,6 +19,11 @@ export const _CaffeineStorageRefillResult = IDL.Record({
   'success' : IDL.Opt(IDL.Bool),
   'topped_up_amount' : IDL.Opt(IDL.Nat),
 });
+export const UserRole = IDL.Variant({
+  'admin' : IDL.Null,
+  'user' : IDL.Null,
+  'guest' : IDL.Null,
+});
 export const ExternalBlob = IDL.Vec(IDL.Nat8);
 export const Data = IDL.Record({
   'weight' : IDL.Opt(IDL.Int),
@@ -31,6 +36,7 @@ export const Data = IDL.Record({
   'mobileNumber' : IDL.Text,
   'image' : IDL.Opt(ExternalBlob),
 });
+export const UserProfile = IDL.Record({ 'name' : IDL.Text });
 
 export const idlService = IDL.Service({
   '_caffeineStorageBlobIsLive' : IDL.Func(
@@ -59,11 +65,31 @@ export const idlService = IDL.Service({
       [],
     ),
   '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
+  '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+  'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'create' : IDL.Func([IDL.Text, Data], [Data], []),
+  'createPersonalRecord' : IDL.Func([Data], [Data], []),
   'delete' : IDL.Func([IDL.Text], [], []),
-  'listAll' : IDL.Func([], [IDL.Vec(Data)], ['query']),
-  'read' : IDL.Func([IDL.Text], [Data], ['query']),
+  'deletePersonalRecord' : IDL.Func([], [], []),
+  'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
+  'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+  'getPersonalRecordByUser' : IDL.Func(
+      [IDL.Principal],
+      [IDL.Opt(Data)],
+      ['query'],
+    ),
+  'getUserProfile' : IDL.Func(
+      [IDL.Principal],
+      [IDL.Opt(UserProfile)],
+      ['query'],
+    ),
+  'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'listAllAdmin' : IDL.Func([], [IDL.Vec(Data)], ['query']),
+  'readAdmin' : IDL.Func([IDL.Text], [Data], ['query']),
+  'readPersonalRecord' : IDL.Func([], [IDL.Opt(Data)], ['query']),
+  'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'update' : IDL.Func([IDL.Text, Data], [Data], []),
+  'updatePersonalRecord' : IDL.Func([Data], [Data], []),
 });
 
 export const idlInitArgs = [];
@@ -80,6 +106,11 @@ export const idlFactory = ({ IDL }) => {
     'success' : IDL.Opt(IDL.Bool),
     'topped_up_amount' : IDL.Opt(IDL.Nat),
   });
+  const UserRole = IDL.Variant({
+    'admin' : IDL.Null,
+    'user' : IDL.Null,
+    'guest' : IDL.Null,
+  });
   const ExternalBlob = IDL.Vec(IDL.Nat8);
   const Data = IDL.Record({
     'weight' : IDL.Opt(IDL.Int),
@@ -92,6 +123,7 @@ export const idlFactory = ({ IDL }) => {
     'mobileNumber' : IDL.Text,
     'image' : IDL.Opt(ExternalBlob),
   });
+  const UserProfile = IDL.Record({ 'name' : IDL.Text });
   
   return IDL.Service({
     '_caffeineStorageBlobIsLive' : IDL.Func(
@@ -120,11 +152,31 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
+    '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+    'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'create' : IDL.Func([IDL.Text, Data], [Data], []),
+    'createPersonalRecord' : IDL.Func([Data], [Data], []),
     'delete' : IDL.Func([IDL.Text], [], []),
-    'listAll' : IDL.Func([], [IDL.Vec(Data)], ['query']),
-    'read' : IDL.Func([IDL.Text], [Data], ['query']),
+    'deletePersonalRecord' : IDL.Func([], [], []),
+    'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
+    'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+    'getPersonalRecordByUser' : IDL.Func(
+        [IDL.Principal],
+        [IDL.Opt(Data)],
+        ['query'],
+      ),
+    'getUserProfile' : IDL.Func(
+        [IDL.Principal],
+        [IDL.Opt(UserProfile)],
+        ['query'],
+      ),
+    'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'listAllAdmin' : IDL.Func([], [IDL.Vec(Data)], ['query']),
+    'readAdmin' : IDL.Func([IDL.Text], [Data], ['query']),
+    'readPersonalRecord' : IDL.Func([], [IDL.Opt(Data)], ['query']),
+    'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'update' : IDL.Func([IDL.Text, Data], [Data], []),
+    'updatePersonalRecord' : IDL.Func([Data], [Data], []),
   });
 };
 
