@@ -1,0 +1,44 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Switch record height UI and validation from centimeters to inches",
+  "requirements": [
+    {
+      "id": "REQ-8",
+      "summary": "Update height field UI text to use inches in the create/edit form and record detail view.",
+      "acceptanceCriteria": [
+        "In the record form, the height label reads \"Height (in)\" (or \"Height (inches)\") instead of \"Height (cm)\".",
+        "In the record detail view, the height value is displayed with an inches suffix (e.g., \"70 in\") instead of centimeters.",
+        "No other field labels/units are changed."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/records/RecordForm.tsx",
+          "operation": "modify",
+          "description": "Change the height input label from centimeters to inches (e.g., update \"Height (cm)\" to \"Height (in)\"). Keep all other field labels/units unchanged."
+        },
+        {
+          "path": "frontend/src/features/records/RecordDetail.tsx",
+          "operation": "modify",
+          "description": "Update the height display suffix from \"cm\" to \"in\" in the record detail view. Do not change any other displayed units (e.g., weight stays \"kg\")."
+        }
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "summary": "Update frontend height validation to validate inches (range + error message), while keeping height optional and non-numeric messaging unchanged.",
+      "acceptanceCriteria": [
+        "Submitting a height value outside the new inches range shows a height validation error that references inches (not centimeters).",
+        "Submitting a non-numeric height continues to show \"Height must be a number\".",
+        "Height remains optional (empty height is allowed)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/records/validators.ts",
+          "operation": "modify",
+          "description": "Update height validation to treat the input as inches (not centimeters): adjust the allowed numeric range to an inches-appropriate range (e.g., 31–98) and update the range validation error message to reference inches (\"in\"/\"inches\"). Keep the non-numeric message exactly \"Height must be a number\" and keep height optional."
+        }
+      ]
+    }
+  ]
+}

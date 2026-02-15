@@ -1,0 +1,44 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-update-the-ui-to-use-inches-for-the-height-field-instead-of-centimeters-including-the-height-input-label-in-the-record-create-edit-form-and-the-height-unit-displayed-in-the-record-detail-view",
+      "featureTitle": "Update the UI to use inches for the height field instead of centimeters, including the height input label in the record create/edit form and the height unit displayed in the record detail view.",
+      "files": [
+        "frontend/src/features/records/RecordDetail.tsx",
+        "frontend/src/features/records/RecordForm.tsx"
+      ],
+      "components": [
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-8"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-frontend-validation-for-the-height-field-to-validate-inches-not-centimeters-including-updating-the-allowed-numeric-range-and-the-validation-error-message-to-reference-inches",
+      "featureTitle": "Update frontend validation for the height field to validate inches (not centimeters), including updating the allowed numeric range and the validation error message to reference inches.",
+      "files": [
+        "frontend/src/features/records/validators.ts"
+      ],
+      "components": [
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-9"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

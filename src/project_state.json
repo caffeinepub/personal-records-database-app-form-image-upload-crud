@@ -1,0 +1,110 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 5,
+  "summary": "Build an app to store and manage a simple personal database with fields: name, mobile number, date of birth, education, height, weight, hobby, city, and a final image.",
+  "architectural_notes": [
+    "Decide whether to store height internally in inches or store a canonical unit (e.g., cm) and convert for display; keep validation consistent with the chosen unit."
+  ],
+  "known_issues": [],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-build-a-frontend-form-to-create-and-edit-records-with-inputs-for-name-mobile-number-date-of-birth-education-height-weight-hobby-city-and-an-image-upload-control",
+      "title": "Build a frontend form to create and edit records with inputs for: name, mobile number, date of birth, education, height, weight, hobby, city, and an image upload control.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-frontend-records-list-view-that-displays-stored-records-and-allows-selecting-a-record-to-view-details-edit-it-or-delete-it",
+      "title": "Create a frontend records list view that displays stored records and allows selecting a record to view details, edit it, or delete it.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-wire-the-frontend-to-the-backend-using-react-query-for-fetching-and-mutations-create-update-delete-including-optimistic-or-refetch-based-consistency-so-the-list-updates-after-changes",
+      "title": "Wire the frontend to the backend using React Query for fetching and mutations (create/update/delete), including optimistic or refetch-based consistency so the list updates after changes.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-a-coherent-creative-visual-theme-across-the-app-colors-typography-spacing-and-components-suitable-for-a-simple-personal-database-ui-keep-it-consistent-across-the-form-list-and-detail-views",
+      "title": "Apply a coherent, creative visual theme across the app (colors, typography, spacing, and components) suitable for a simple personal database UI; keep it consistent across the form, list, and detail views.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-ui-to-use-inches-for-the-height-field-instead-of-centimeters-including-the-height-input-label-in-the-record-create-edit-form-and-the-height-unit-displayed-in-the-record-detail-view",
+      "title": "Update the UI to use inches for the height field instead of centimeters, including the height input label in the record create/edit form and the height unit displayed in the record detail view.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-validation-for-the-height-field-to-validate-inches-not-centimeters-including-updating-the-allowed-numeric-range-and-the-validation-error-message-to-reference-inches",
+      "title": "Update frontend validation for the height field to validate inches (not centimeters), including updating the allowed numeric range and the validation error message to reference inches.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Create a database-style app to capture and store records with fields: name, mobile number, date of birth, education, height, weight, hobby, city, and an image.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Create a data model for a personal record with the following fields: name, mobile number, date of birth, education, height, weight, hobby, city, and an image; persist records in the Motoko canister so they remain available after refresh/redeploy.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Implement CRUD canister methods for the personal records database: create a record, list all records, get a record by id, update a record, and delete a record.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Add backend validation for record fields: require name and mobile number; validate mobile number is numeric and within a reasonable length; validate height and weight are numeric; validate date of birth is a valid date; reject images above a reasonable maximum size.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Change the height field to use inches instead of centimeters (update UI label/input expectations and any stored data/validation accordingly).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Update backend validation for the height field to treat the stored height value as inches, including updating the allowed numeric range and the trap error message to reference inches.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Personal Records Database App (Form + Image Upload + CRUD)",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

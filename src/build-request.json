@@ -1,0 +1,84 @@
+{
+  "kind": "build_request",
+  "title": "Change height field from centimeters to inches",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-8",
+      "text": "Update the UI to use inches for the height field instead of centimeters, including the height input label in the record create/edit form and the height unit displayed in the record detail view.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "height ko cm se nikal ke Inch kardo"
+        ]
+      },
+      "acceptanceCriteria": [
+        "In the record form, the height label reads \"Height (in)\" (or \"Height (inches)\") instead of \"Height (cm)\".",
+        "In the record detail view, the height value is displayed with an inches suffix (e.g., \"70 in\") instead of centimeters.",
+        "No other field labels/units are changed."
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "text": "Update frontend validation for the height field to validate inches (not centimeters), including updating the allowed numeric range and the validation error message to reference inches.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "height ko cm se nikal ke Inch kardo"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Submitting a height value outside the new inches range shows a height validation error that references inches (not centimeters).",
+        "Submitting a non-numeric height continues to show \"Height must be a number\".",
+        "Height remains optional (empty height is allowed)."
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "text": "Update backend validation for the height field to treat the stored height value as inches, including updating the allowed numeric range and the trap error message to reference inches.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "height ko cm se nikal ke Inch kardo"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Creating or updating a record with a height outside the new inches range traps with an error message that references inches (not centimeters).",
+        "Creating or updating a record with a valid height in inches succeeds and the stored value is returned unchanged.",
+        "No changes are made to other backend validation rules (e.g., weight, mobile number, date of birth)."
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not edit files under frontend/immutablePaths (e.g., frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui).",
+    "Keep all Motoko backend logic in the single actor in backend/main.mo; only add backend/migration.mo if it is strictly necessary for preserving existing stable state."
+  ],
+  "nonGoals": [
+    "Adding automatic cm↔in conversion UI toggles or dual-unit display.",
+    "Changing weight units or validation.",
+    "Changing the record schema beyond reinterpreting the height unit."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
+  }
+}

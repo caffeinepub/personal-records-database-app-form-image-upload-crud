@@ -1,2 +1,3 @@
-# personal-records-database-app-form-image-upload-crud
-Exported from Caffeine project: Personal Records Database App (Form + Image Upload + CRUD)
+## 
+
+To run app build and run docker image: `docker build -t app . docker run -it --network host app`
