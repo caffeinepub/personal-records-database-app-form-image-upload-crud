@@ -2,35 +2,13 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-frontend-so-the-admin-panel-no-longer-displays-or-manages-the-personal-records-database-instead-implement-a-separate-personal-records-experience-outside-the-admin-panel-for-signed-in-users",
-      "featureTitle": "Update the frontend so the Admin Panel no longer displays or manages the personal records database; instead, implement a separate “Personal Records” experience outside the Admin Panel for signed-in users.",
+      "featureId": "feature-restore-the-application-code-and-deployed-draft-behavior-to-match-the-previously-working-draft-version-8-build-logic-across-both-frontend-and-backend-i-e-roll-back-any-changes-introduced-after-version-8-that-altered-runtime-behavior",
+      "featureTitle": "Restore the application code and deployed draft behavior to match the previously working Draft Version 8 build/logic across both frontend and backend (i.e., roll back any changes introduced after Version 8 that altered runtime behavior).",
       "files": [
+        "frontend/src/App.tsx",
         "frontend/src/components/PersonalRecords/AuthButton.tsx",
-        "frontend/src/components/PersonalRecords/SignInGate.tsx",
-        "frontend/src/features/records/RecordsPage.tsx"
-      ],
-      "components": [
-        "blob-storage@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0"
-      ],
-      "testIds": [
-        "REQ-2"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-adjust-react-query-hooks-and-mutations-to-support-personal-record-crud-outside-the-admin-panel-with-correct-cache-keys-and-optimistic-refresh-behavior-similar-to-the-existing-admin-record-flows",
-      "featureTitle": "Add/adjust React Query hooks and mutations to support personal-record CRUD outside the Admin Panel, with correct cache keys and optimistic/refresh behavior similar to the existing admin-record flows.",
-      "files": [
-        "frontend/src/features/personalRecords/mutations.ts",
+        "frontend/src/features/admin/AdminPanel.tsx",
         "frontend/src/features/personalRecords/queries.ts",
-        "frontend/src/features/records/RecordDetail.tsx",
-        "frontend/src/features/records/RecordForm.tsx",
         "frontend/src/features/records/mutations.ts"
       ],
       "components": [
@@ -43,7 +21,7 @@
         "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-3"
+        "REQ-1"
       ],
       "confidence": "high"
     }

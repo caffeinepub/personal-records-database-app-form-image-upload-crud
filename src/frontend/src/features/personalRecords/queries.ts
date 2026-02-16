@@ -7,8 +7,10 @@ export function usePersonalRecord() {
   const { actor, isFetching: isActorFetching } = useActor();
   const { identity } = useInternetIdentity();
 
+  const principalText = identity?.getPrincipal().toString() || null;
+
   const query = useQuery<Data | null>({
-    queryKey: ['personal-record'],
+    queryKey: ['personal-record', principalText],
     queryFn: async () => {
       if (!actor) throw new Error('Actor not available');
       return actor.readPersonalRecord();

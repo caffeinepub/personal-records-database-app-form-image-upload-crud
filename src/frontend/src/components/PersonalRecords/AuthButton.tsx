@@ -14,6 +14,12 @@ export function AuthButton() {
   const handleAuth = async () => {
     if (isAuthenticated) {
       await clear();
+      // Clear all identity-scoped queries to prevent cache leakage
+      queryClient.removeQueries({ queryKey: ['isAdmin'] });
+      queryClient.removeQueries({ queryKey: ['admin-records'] });
+      queryClient.removeQueries({ queryKey: ['admin-personal-records'] });
+      queryClient.removeQueries({ queryKey: ['admin-personal-record'] });
+      queryClient.removeQueries({ queryKey: ['personal-record'] });
       queryClient.clear();
     } else {
       try {

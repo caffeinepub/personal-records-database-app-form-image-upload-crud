@@ -41,10 +41,11 @@ export interface backendInterface {
     deletePersonalRecord(): Promise<void>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
-    getPersonalRecordByUser(user: Principal): Promise<Data | null>;
+    getPersonalRecordByUserAdmin(user: Principal): Promise<Data | null>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     listAllAdmin(): Promise<Array<Data>>;
+    listAllPersonalRecordsAdmin(): Promise<Array<[Principal, Data]>>;
     readAdmin(personId: string): Promise<Data>;
     readPersonalRecord(): Promise<Data | null>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;

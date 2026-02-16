@@ -1,49 +1,88 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-15T12:03:08.818Z",
-  "summary": "Diff implements a new frontend “Personal Records” signed-in experience with separate React Query keys and mutations, and introduces a second backend Map intended for personal records. However, the diff summary does not provide evidence that the backend actually exposes the required personal-record CRUD APIs scoped to caller identity, nor that admin APIs are restricted to the admin store only. No migration logic is shown. Some extra backend functionality (user profiles) appears added without being requested.",
+  "generatedAt": "2026-02-16T04:52:58.587Z",
+  "summary": "The diff introduces multiple new/changed backend and frontend behaviors (e.g., user profiles, separated admin vs personal storage, identity-scoped React Query cache handling, new admin-panel navigation/tabbing). The BuildRequest only asks to restore Draft Version 8 behavior, but the diff summary does not provide evidence that changes are a rollback to Version 8 rather than new functionality. As a result, REQ-1 cannot be verified as implemented and several changes look like unrequested feature additions/behavior changes.",
   "missing_requirements": [
     {
       "id": "REQ-1",
-      "requirement": "Expose dedicated personal-record CRUD APIs that are scoped to the caller Principal so users can only list/read/update/delete their own personal records; reject unauthorized callers with clear errors; and ensure Admin Panel APIs operate only on the admin record store.",
-      "reason": "backend/main.mo shows a new `personalRecords : Map<Principal, Data>` and `persons : Map<Text, Data>` split, but the diff excerpt does not include any `createPersonalRecord/readPersonalRecord/updatePersonalRecord/deletePersonalRecord` implementations, nor evidence that existing admin APIs were updated to only access `persons` (admin store) and never touch `personalRecords`.",
+      "requirement": "Restore the application code and deployed draft behavior to match the previously working Draft Version 8 build/logic across both frontend and backend (i.e., roll back any changes introduced after Version 8 that altered runtime behavior).",
+      "reason": "The diff shows substantial new/altered logic (backend user profile APIs, separate admin/personal record storage, frontend view switching, new cache handling, mutation/validation behaviors), but provides no evidence these specific changes correspond to reverting to Draft Version 8. Without any Version 8 reference point in the diff, the required rollback-to-Version-8 behavior match cannot be confirmed.",
       "evidence": [
-        "backend/main.mo (truncated)",
-        "frontend/src/features/personalRecords/queries.ts (calls actor.readPersonalRecord())",
-        "frontend/src/features/personalRecords/mutations.ts (calls actor.createPersonalRecord/updatePersonalRecord/deletePersonalRecord)"
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "requirement": "If schema changes would drop/orphan existing stored records, add a conditional Motoko migration to preserve existing data into the appropriate new store(s) and ensure upgrades do not trap.",
-      "reason": "No `backend/migration.mo` was added, and the diff summary provides no evidence of stable variable/upgrade handling (e.g., preupgrade/postupgrade) to preserve existing records when introducing the new separated stores.",
-      "evidence": [
-        "ADDED FILES list (no backend/migration.mo)",
-        "backend/main.mo (truncated; no upgrade/migration logic shown)"
+        "backend/main.mo",
+        "frontend/src/App.tsx",
+        "frontend/src/features/admin/AdminPanel.tsx",
+        "frontend/src/components/PersonalRecords/AuthButton.tsx",
+        "frontend/src/features/personalRecords/mutations.ts",
+        "frontend/src/features/personalRecords/queries.ts",
+        "frontend/src/features/records/mutations.ts",
+        "frontend-file-summaries.txt"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Backend user profile types and APIs (UserProfile, userProfiles Map, getCallerUserProfile/getUserProfile/saveCallerUserProfile).",
-      "reason": "Not part of the BuildRequest requirements (which focus on separating admin vs personal record storage and UI/hooks).",
+      "description": "Backend user profile feature (UserProfile type and get/save profile APIs) with authorization checks.",
+      "reason": "BuildRequest only asks to restore Version 8 behavior and explicitly disallows new product features beyond restoration; no requirement mentions user profiles.",
       "evidence": [
-        "backend/main.mo (truncated): `public type UserProfile`, `userProfiles`, `getCallerUserProfile`, `getUserProfile`, `saveCallerUserProfile`"
+        "backend/main.mo"
+      ]
+    },
+    {
+      "description": "Backend separation of storage into admin persons vs per-principal personalRecords maps (distinct storage boundaries) and associated behavior changes.",
+      "reason": "Not requested explicitly; presented as new/changed architecture/behavior rather than a clearly-scoped rollback.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "description": "Frontend app-level manual view switching between 'records' and 'admin' with Admin Panel button/back button in header.",
+      "reason": "Not requested explicitly in the restoration-only BuildRequest; appears as a UI-flow change/addition.",
+      "evidence": [
+        "frontend/src/App.tsx"
+      ]
+    },
+    {
+      "description": "Aggressive React Query cache clearing/removal of multiple query keys on logout to prevent cross-user cache leakage.",
+      "reason": "Not requested explicitly; may be a fix/improvement but still a behavior change beyond the stated restoration requirement.",
+      "evidence": [
+        "frontend/src/components/PersonalRecords/AuthButton.tsx"
+      ]
+    },
+    {
+      "description": "AdminPanel refetch-on-mutation success behavior and use of mobileNumber as the record ID for update/delete (client-side mapping).",
+      "reason": "Not specified in BuildRequest; appears as newly introduced client behavior assumptions.",
+      "evidence": [
+        "frontend/src/features/admin/AdminPanel.tsx"
+      ]
+    },
+    {
+      "description": "Upload progress logging via ExternalBlob.withUploadProgress and toast-based success/error UX for personal/admin mutations.",
+      "reason": "Not requested; adds UI/UX behavior and logging beyond the restoration requirement.",
+      "evidence": [
+        "frontend/src/features/personalRecords/mutations.ts",
+        "frontend/src/features/records/mutations.ts"
+      ]
+    },
+    {
+      "description": "Identity-scoped query keys and optimistic cache updates for admin-records/personal-record data.",
+      "reason": "Not requested explicitly; introduces specific caching semantics that may change runtime behavior.",
+      "evidence": [
+        "frontend/src/features/personalRecords/queries.ts",
+        "frontend/src/features/personalRecords/mutations.ts",
+        "frontend/src/features/records/mutations.ts"
       ]
     }
   ],
-  "confidence": 0.68,
+  "confidence": 0.62,
   "changed_files": [
     "backend/main.mo",
     "frontend-file-summaries.txt",
+    "frontend/src/App.tsx",
     "frontend/src/components/PersonalRecords/AuthButton.tsx",
-    "frontend/src/components/PersonalRecords/SignInGate.tsx",
+    "frontend/src/features/admin/AdminPanel.tsx",
     "frontend/src/features/personalRecords/mutations.ts",
     "frontend/src/features/personalRecords/queries.ts",
-    "frontend/src/features/records/RecordDetail.tsx",
-    "frontend/src/features/records/RecordForm.tsx",
-    "frontend/src/features/records/RecordsPage.tsx",
     "frontend/src/features/records/mutations.ts",
     "project_state.json"
   ]

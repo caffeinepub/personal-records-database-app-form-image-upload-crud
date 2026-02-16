@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from '../../hooks/useActor';
+import { useInternetIdentity } from '../../hooks/useInternetIdentity';
 import type { Data } from '../../backend';
 import { ExternalBlob } from '../../backend';
 import { toast } from 'sonner';
@@ -14,6 +15,7 @@ function isAuthorizationError(error: Error): boolean {
 export function useCreateRecord() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
+  const { identity } = useInternetIdentity();
 
   return useMutation({
     mutationFn: async ({ personId, data, imageFile }: { personId: string; data: Data; imageFile?: File }) => {
@@ -32,14 +34,15 @@ export function useCreateRecord() {
       return actor.create(personId, finalData);
     },
     onSuccess: (createdRecord) => {
-      // Optimistically update the admin cache with the new record
-      queryClient.setQueryData<Data[]>(['admin-records'], (oldData) => {
+      const principalText = identity?.getPrincipal().toString() || null;
+      // Optimistically update the identity-scoped admin cache with the new record
+      queryClient.setQueryData<Data[]>(['admin-records', principalText], (oldData) => {
         if (!oldData) return [createdRecord];
         return [...oldData, createdRecord].sort((a, b) => a.name.localeCompare(b.name));
       });
       
       // Still invalidate to ensure consistency with backend
-      queryClient.invalidateQueries({ queryKey: ['admin-records'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-records', principalText] });
       toast.success('Record created successfully');
     },
     onError: (error: Error) => {
@@ -56,6 +59,7 @@ export function useCreateRecord() {
 export function useUpdateRecord() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
+  const { identity } = useInternetIdentity();
 
   return useMutation({
     mutationFn: async ({ personId, data, imageFile }: { personId: string; data: Data; imageFile?: File }) => {
@@ -74,8 +78,9 @@ export function useUpdateRecord() {
       return actor.update(personId, finalData);
     },
     onSuccess: (updatedRecord) => {
-      // Optimistically update the admin cache with the updated record
-      queryClient.setQueryData<Data[]>(['admin-records'], (oldData) => {
+      const principalText = identity?.getPrincipal().toString() || null;
+      // Optimistically update the identity-scoped admin cache with the updated record
+      queryClient.setQueryData<Data[]>(['admin-records', principalText], (oldData) => {
         if (!oldData) return [updatedRecord];
         return oldData.map(record => 
           record.mobileNumber === updatedRecord.mobileNumber ? updatedRecord : record
@@ -83,7 +88,7 @@ export function useUpdateRecord() {
       });
       
       // Still invalidate to ensure consistency with backend
-      queryClient.invalidateQueries({ queryKey: ['admin-records'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-records', principalText] });
       toast.success('Record updated successfully');
     },
     onError: (error: Error) => {
@@ -100,6 +105,7 @@ export function useUpdateRecord() {
 export function useDeleteRecord() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
+  const { identity } = useInternetIdentity();
 
   return useMutation({
     mutationFn: async (personId: string) => {
@@ -107,7 +113,8 @@ export function useDeleteRecord() {
       return actor.delete_(personId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-records'] });
+      const principalText = identity?.getPrincipal().toString() || null;
+      queryClient.invalidateQueries({ queryKey: ['admin-records', principalText] });
       toast.success('Record deleted successfully');
     },
     onError: (error: Error) => {

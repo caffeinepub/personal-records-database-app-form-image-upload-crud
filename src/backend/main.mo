@@ -252,11 +252,21 @@ actor {
     personalRecords.get(caller);
   };
 
-  public query ({ caller }) func getPersonalRecordByUser(user : Principal) : async ?Data {
-    // Users can only view their own record, admins can view any
-    if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Can only view your own personal record");
+  // Admin-only: Return all personal records with associated principal
+  public query ({ caller }) func listAllPersonalRecordsAdmin() : async [(Principal, Data)] {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can view all personal records.");
+    };
+    let entries = personalRecords.toArray();
+    entries;
+  };
+
+  // Admin-only: Get personal record by user principal
+  public query ({ caller }) func getPersonalRecordByUserAdmin(user : Principal) : async ?Data {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can view records of other users.");
     };
     personalRecords.get(user);
   };
 };
+

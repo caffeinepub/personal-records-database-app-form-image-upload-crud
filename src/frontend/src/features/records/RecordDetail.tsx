@@ -7,8 +7,8 @@ import type { Data } from '../../backend';
 
 interface RecordDetailProps {
   record: Data;
-  onEdit: () => void;
-  onDelete: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
   isDeleting?: boolean;
   readOnly?: boolean;
 }
@@ -33,7 +33,7 @@ export function RecordDetail({ record, onEdit, onDelete, isDeleting, readOnly = 
               <p className="text-sm text-muted-foreground mt-1">Personal Information</p>
             </div>
           </div>
-          {!readOnly && (
+          {!readOnly && onEdit && onDelete && (
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={onEdit}>
                 <Edit className="h-4 w-4 mr-2" />

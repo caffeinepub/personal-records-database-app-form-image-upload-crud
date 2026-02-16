@@ -73,7 +73,7 @@ export const idlService = IDL.Service({
   'deletePersonalRecord' : IDL.Func([], [], []),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
-  'getPersonalRecordByUser' : IDL.Func(
+  'getPersonalRecordByUserAdmin' : IDL.Func(
       [IDL.Principal],
       [IDL.Opt(Data)],
       ['query'],
@@ -85,6 +85,11 @@ export const idlService = IDL.Service({
     ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'listAllAdmin' : IDL.Func([], [IDL.Vec(Data)], ['query']),
+  'listAllPersonalRecordsAdmin' : IDL.Func(
+      [],
+      [IDL.Vec(IDL.Tuple(IDL.Principal, Data))],
+      ['query'],
+    ),
   'readAdmin' : IDL.Func([IDL.Text], [Data], ['query']),
   'readPersonalRecord' : IDL.Func([], [IDL.Opt(Data)], ['query']),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
@@ -160,7 +165,7 @@ export const idlFactory = ({ IDL }) => {
     'deletePersonalRecord' : IDL.Func([], [], []),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
-    'getPersonalRecordByUser' : IDL.Func(
+    'getPersonalRecordByUserAdmin' : IDL.Func(
         [IDL.Principal],
         [IDL.Opt(Data)],
         ['query'],
@@ -172,6 +177,11 @@ export const idlFactory = ({ IDL }) => {
       ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'listAllAdmin' : IDL.Func([], [IDL.Vec(Data)], ['query']),
+    'listAllPersonalRecordsAdmin' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Tuple(IDL.Principal, Data))],
+        ['query'],
+      ),
     'readAdmin' : IDL.Func([IDL.Text], [Data], ['query']),
     'readPersonalRecord' : IDL.Func([], [IDL.Opt(Data)], ['query']),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),

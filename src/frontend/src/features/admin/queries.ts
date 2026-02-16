@@ -1,12 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
 import { useActor } from '../../hooks/useActor';
+import { useInternetIdentity } from '../../hooks/useInternetIdentity';
 import type { Data } from '../../backend';
 
-export function useAdminRecords(isAuthenticated: boolean) {
+export function useAdminRecords(isAdmin: boolean) {
   const { actor, isFetching: isActorFetching } = useActor();
+  const { identity } = useInternetIdentity();
+
+  const principalText = identity?.getPrincipal().toString() || null;
 
   return useQuery<Data[]>({
-    queryKey: ['admin-records'],
+    queryKey: ['admin-records', principalText],
     queryFn: async () => {
       if (!actor) return [];
       try {
@@ -16,7 +20,7 @@ export function useAdminRecords(isAuthenticated: boolean) {
         throw error;
       }
     },
-    enabled: !!actor && !isActorFetching && isAuthenticated,
+    enabled: !!actor && !isActorFetching && !!identity && isAdmin === true,
     retry: false,
   });
 }

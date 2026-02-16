@@ -1,78 +1,51 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Personal Records experience separated from Admin Panel (frontend)",
+  "title": "Restore Draft Version 8 runtime behavior (frontend-only)",
   "requirements": [
     {
-      "id": "REQ-2",
-      "summary": "Move personal-record management out of the Admin Panel into a dedicated signed-in Personal Records experience, while keeping Admin Panel admin-only.",
+      "id": "REQ-1",
+      "summary": "Roll back frontend runtime behavior to match Draft Version 8 UI flows, caching, and authorization gating behavior.",
       "acceptanceCriteria": [
-        "Admin Panel UI only uses admin-only record queries/mutations and does not call personal-record APIs.",
-        "The non-admin area (Records view) provides a user-facing UI to view and manage the signed-in user’s personal records (list + detail + create/edit/delete) using the new personal-record APIs.",
-        "If the user is not signed in (Internet Identity), the Records view shows a clear sign-in prompt and does not show any records.",
-        "User-facing text is in English."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Wire the Records view to render the new Personal Records experience instead of the current static admin-only message page; keep Admin Panel navigation intact so Admin Panel remains separate from Personal Records."
-        },
-        {
-          "path": "frontend/src/features/records/RecordsPage.tsx",
-          "operation": "modify",
-          "description": "Replace the current admin-only explanatory content with a Personal Records page that: (1) shows a clear Internet Identity sign-in prompt when unauthenticated, and (2) when authenticated, renders the personal-record list/detail and create/edit/delete UI. Use the authorization system via the existing Internet Identity hook (selected component: authorization) for gated access; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/PersonalRecords/AuthButton.tsx",
-          "operation": "create",
-          "description": "Add a reusable login/logout button for the Personal Records page using the existing Internet Identity hook and clearing React Query cache on logout (selected component: authorization). Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/PersonalRecords/SignInGate.tsx",
-          "operation": "create",
-          "description": "Create a small wrapper component that shows the sign-in prompt (with AuthButton) when the user is not authenticated, and renders children only when authenticated (selected component: authorization). Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/AppLayout.tsx",
-          "operation": "modify",
-          "description": "Adjust header/subtitle wording if needed so the primary non-admin experience is clearly 'Personal Records' (English-only copy), without introducing new top-level routes."
-        }
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "summary": "Add dedicated React Query hooks/mutations for personal-record CRUD with separate cache keys and smooth UI updates + graceful authorization error handling.",
-      "acceptanceCriteria": [
-        "There are separate React Query cache keys for admin records and personal records (no shared cache keys).",
-        "Creating/updating a personal record immediately reflects in the personal records list and the selected detail view without requiring a manual reload.",
-        "Authorization errors for personal-record actions are handled gracefully in the UI (English messaging)."
+        "After rebuild and deploy, the app’s UI flows and data/authorization behavior match the Draft Version 8 behavior as the user experienced it.",
+        "No new regressions are introduced in sign-in/sign-out flow, records CRUD (admin + personal), and admin gating versus the Version 8 baseline.",
+        "The deployed draft can be opened and used without runtime errors in the browser console."
       ],
       "file_operations": [
         {
           "path": "frontend/src/features/personalRecords/queries.ts",
-          "operation": "create",
-          "description": "Implement React Query hooks for personal records that call the backend personal-record capabilities (e.g., reading the caller’s personal record) using cache keys that are distinct from admin records (e.g., not ['admin-records']). Ensure hooks are enabled only when an actor is available and the user is authenticated (selected component: authorization). Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/features/personalRecords/mutations.ts",
-          "operation": "create",
-          "description": "Implement React Query mutations for create/update/delete personal record using the backend personal-record capabilities, with separate cache keys and optimistic/update-on-success behavior so list + detail refresh immediately. Handle authorization failures gracefully (English) (selected components: authorization, blob-storage for ExternalBlob image uploads via direct URL). Verify the component's usage instructions before implementing."
+          "operation": "modify",
+          "description": "Restore Version 8-like identity-scoped data fetching behavior by scoping the personal record React Query cache key to the signed-in principal (prevent cross-user cache leakage after logout/login) and ensure the loading/fetched flags remain consistent with actor/identity readiness. Use the authorization component patterns (Internet Identity gating expectations) and verify the component's usage instructions before implementing."
         },
         {
           "path": "frontend/src/features/records/mutations.ts",
           "operation": "modify",
-          "description": "Keep existing mutations explicitly scoped to admin-record flows only; ensure they continue to update only the admin cache key(s) and do not share personal-record cache keys (no cross-invalidation)."
+          "description": "Align admin-record mutations to the same identity-scoped query keys used by admin record queries (avoid stale UI and mismatched cache updates), and ensure optimistic updates/invalidation target the correct cache entries for the current principal. Continue using blob-storage ExternalBlob upload support for images and verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/features/records/RecordForm.tsx",
+          "path": "frontend/src/features/admin/queries.ts",
           "operation": "modify",
-          "description": "Make the form usable for both admin and personal flows by allowing the parent page to control submit behavior and error messaging; ensure displayed messages remain English and do not assume admin-only authorization on failure."
+          "description": "Ensure admin record list queries use the same query key conventions expected by mutations and view wiring (identity-scoped), and confirm Version 8-like behavior for refresh/refetch when identity changes. Use the authorization component patterns for admin-only data visibility and verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/features/records/RecordDetail.tsx",
+          "path": "frontend/src/features/admin/AdminPanel.tsx",
           "operation": "modify",
-          "description": "Ensure detail rendering supports personal-record usage (e.g., readOnly mode when appropriate) and that authorization/failed action states can be surfaced cleanly by the parent page (English-only messaging)."
+          "description": "Restore Version 8 admin CRUD interaction behavior by ensuring create/update/delete flows use stable record identifiers, selection behavior updates reliably after mutations, and the admin records list refreshes correctly using the identity-scoped caches. Ensure admin gating remains consistent with authorization expectations and verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/PersonalRecords/AuthButton.tsx",
+          "operation": "modify",
+          "description": "Restore Version 8 sign-out behavior by clearing all identity-scoped caches (including personal record cache) and any admin/personal record caches keyed by principal to avoid post-logout data bleed and UI inconsistencies. Use the authorization component sign-in/sign-out guidance and verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/admin/AdminGate.tsx",
+          "operation": "modify",
+          "description": "Validate and restore Version 8 admin gating UX and state transitions (initializing → sign-in prompt → verifying access → access denied/allowed) and ensure errors from authorization checks are handled without console/runtime crashes. Use the authorization component access control UI guidance and verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Restore Version 8 top-level navigation and view switching behavior by ensuring admin view access is only exposed when the current principal is confirmed admin, and the app safely returns to the records view on auth/role changes without leaving the UI in an inconsistent state. Use the authorization component patterns and verify the component's usage instructions before implementing."
         }
       ]
     }

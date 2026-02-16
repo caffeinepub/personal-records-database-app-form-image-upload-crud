@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from '../../hooks/useActor';
+import { useInternetIdentity } from '../../hooks/useInternetIdentity';
 import type { Data } from '../../backend';
 import { ExternalBlob } from '../../backend';
 import { toast } from 'sonner';
@@ -14,6 +15,7 @@ function isAuthorizationError(error: Error): boolean {
 export function useCreatePersonalRecord() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
+  const { identity } = useInternetIdentity();
 
   return useMutation({
     mutationFn: async ({ data, imageFile }: { data: Data; imageFile?: File }) => {
@@ -32,11 +34,12 @@ export function useCreatePersonalRecord() {
       return actor.createPersonalRecord(finalData);
     },
     onSuccess: (createdRecord) => {
-      // Update the cache with the new record
-      queryClient.setQueryData<Data | null>(['personal-record'], createdRecord);
+      const principalText = identity?.getPrincipal().toString() || null;
+      // Update the identity-scoped cache with the new record
+      queryClient.setQueryData<Data | null>(['personal-record', principalText], createdRecord);
       
       // Invalidate to ensure consistency
-      queryClient.invalidateQueries({ queryKey: ['personal-record'] });
+      queryClient.invalidateQueries({ queryKey: ['personal-record', principalText] });
       toast.success('Personal record created successfully');
     },
     onError: (error: Error) => {
@@ -53,6 +56,7 @@ export function useCreatePersonalRecord() {
 export function useUpdatePersonalRecord() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
+  const { identity } = useInternetIdentity();
 
   return useMutation({
     mutationFn: async ({ data, imageFile }: { data: Data; imageFile?: File }) => {
@@ -71,11 +75,12 @@ export function useUpdatePersonalRecord() {
       return actor.updatePersonalRecord(finalData);
     },
     onSuccess: (updatedRecord) => {
-      // Update the cache with the updated record
-      queryClient.setQueryData<Data | null>(['personal-record'], updatedRecord);
+      const principalText = identity?.getPrincipal().toString() || null;
+      // Update the identity-scoped cache with the updated record
+      queryClient.setQueryData<Data | null>(['personal-record', principalText], updatedRecord);
       
       // Invalidate to ensure consistency
-      queryClient.invalidateQueries({ queryKey: ['personal-record'] });
+      queryClient.invalidateQueries({ queryKey: ['personal-record', principalText] });
       toast.success('Personal record updated successfully');
     },
     onError: (error: Error) => {
@@ -92,6 +97,7 @@ export function useUpdatePersonalRecord() {
 export function useDeletePersonalRecord() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
+  const { identity } = useInternetIdentity();
 
   return useMutation({
     mutationFn: async () => {
@@ -99,9 +105,10 @@ export function useDeletePersonalRecord() {
       return actor.deletePersonalRecord();
     },
     onSuccess: () => {
-      // Clear the personal record from cache
-      queryClient.setQueryData<Data | null>(['personal-record'], null);
-      queryClient.invalidateQueries({ queryKey: ['personal-record'] });
+      const principalText = identity?.getPrincipal().toString() || null;
+      // Clear the personal record from identity-scoped cache
+      queryClient.setQueryData<Data | null>(['personal-record', principalText], null);
+      queryClient.invalidateQueries({ queryKey: ['personal-record', principalText] });
       toast.success('Personal record deleted successfully');
     },
     onError: (error: Error) => {

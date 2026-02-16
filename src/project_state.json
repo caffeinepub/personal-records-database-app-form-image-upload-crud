@@ -1,26 +1,16 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Project to build/deploy a site/app with an admin panel, with a requirement that the personal records database be kept outside/separate from the admin panel.",
-  "architectural_notes": [
-    "Personal records data store must be separated from the admin panel (separate access boundary/storage)."
-  ],
+  "summary": "New project",
+  "architectural_notes": [],
   "known_issues": [],
-  "isFixRequest": false,
+  "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-update-the-frontend-so-the-admin-panel-no-longer-displays-or-manages-the-personal-records-database-instead-implement-a-separate-personal-records-experience-outside-the-admin-panel-for-signed-in-users",
-      "title": "Update the frontend so the Admin Panel no longer displays or manages the personal records database; instead, implement a separate “Personal Records” experience outside the Admin Panel for signed-in users.",
+      "id": "feature-restore-the-application-code-and-deployed-draft-behavior-to-match-the-previously-working-draft-version-8-build-logic-across-both-frontend-and-backend-i-e-roll-back-any-changes-introduced-after-version-8-that-altered-runtime-behavior",
+      "title": "Restore the application code and deployed draft behavior to match the previously working Draft Version 8 build/logic across both frontend and backend (i.e., roll back any changes introduced after Version 8 that altered runtime behavior).",
       "reqIds": [
-        "REQ-2"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-adjust-react-query-hooks-and-mutations-to-support-personal-record-crud-outside-the-admin-panel-with-correct-cache-keys-and-optimistic-refresh-behavior-similar-to-the-existing-admin-record-flows",
-      "title": "Add/adjust React Query hooks and mutations to support personal-record CRUD outside the Admin Panel, with correct cache keys and optimistic/refresh behavior similar to the existing admin-record flows.",
-      "reqIds": [
-        "REQ-3"
+        "REQ-1"
       ],
       "version": 1
     }
@@ -28,29 +18,12 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Keep the personal records database outside/separate from the admin panel (separate storage/access boundary).",
+      "summary": "Restore/revert the app to Version 8 build/logic (Version 8 is acceptable)",
       "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-2",
-      "summary": "Create a separate backend storage boundary for “personal records” that is not shared with the Admin Panel’s record storage, and expose dedicated APIs for users to manage only their own personal records.",
-      "reqIds": [
-        "REQ-1"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-5",
-      "summary": "If the backend data schema changes in a way that would otherwise drop or orphan existing stored records, add a conditional Motoko migration to preserve existing data into the appropriate new store(s).",
-      "reqIds": [
-        "REQ-4"
-      ],
       "status": "pending"
     }
   ],
-  "gameProjectType": "none",
-  "projectName": "Separate personal records database from the Admin Panel",
+  "projectName": "Restore app behavior to Draft Version 8",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

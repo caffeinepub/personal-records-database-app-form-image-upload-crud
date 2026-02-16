@@ -134,10 +134,11 @@ export interface backendInterface {
     deletePersonalRecord(): Promise<void>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
-    getPersonalRecordByUser(user: Principal): Promise<Data | null>;
+    getPersonalRecordByUserAdmin(user: Principal): Promise<Data | null>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     listAllAdmin(): Promise<Array<Data>>;
+    listAllPersonalRecordsAdmin(): Promise<Array<[Principal, Data]>>;
     readAdmin(personId: string): Promise<Data>;
     readPersonalRecord(): Promise<Data | null>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
@@ -343,17 +344,17 @@ export class Backend implements backendInterface {
             return from_candid_UserRole_n20(this._uploadFile, this._downloadFile, result);
         }
     }
-    async getPersonalRecordByUser(arg0: Principal): Promise<Data | null> {
+    async getPersonalRecordByUserAdmin(arg0: Principal): Promise<Data | null> {
         if (this.processError) {
             try {
-                const result = await this.actor.getPersonalRecordByUser(arg0);
+                const result = await this.actor.getPersonalRecordByUserAdmin(arg0);
                 return from_candid_opt_n22(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.getPersonalRecordByUser(arg0);
+            const result = await this.actor.getPersonalRecordByUserAdmin(arg0);
             return from_candid_opt_n22(this._uploadFile, this._downloadFile, result);
         }
     }
@@ -397,6 +398,20 @@ export class Backend implements backendInterface {
         } else {
             const result = await this.actor.listAllAdmin();
             return from_candid_vec_n23(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async listAllPersonalRecordsAdmin(): Promise<Array<[Principal, Data]>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.listAllPersonalRecordsAdmin();
+                return from_candid_vec_n24(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.listAllPersonalRecordsAdmin();
+            return from_candid_vec_n24(this._uploadFile, this._downloadFile, result);
         }
     }
     async readAdmin(arg0: string): Promise<Data> {
@@ -548,6 +563,12 @@ function from_candid_record_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint
         topped_up_amount: record_opt_to_undefined(from_candid_opt_n7(_uploadFile, _downloadFile, value.topped_up_amount))
     };
 }
+async function from_candid_tuple_n25(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [Principal, _Data]): Promise<[Principal, Data]> {
+    return [
+        value[0],
+        await from_candid_Data_n13(_uploadFile, _downloadFile, value[1])
+    ];
+}
 function from_candid_variant_n21(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     admin: null;
 } | {
@@ -559,6 +580,9 @@ function from_candid_variant_n21(_uploadFile: (file: ExternalBlob) => Promise<Ui
 }
 async function from_candid_vec_n23(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_Data>): Promise<Array<Data>> {
     return await Promise.all(value.map(async (x)=>await from_candid_Data_n13(_uploadFile, _downloadFile, x)));
+}
+async function from_candid_vec_n24(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<[Principal, _Data]>): Promise<Array<[Principal, Data]>> {
+    return await Promise.all(value.map(async (x)=>await from_candid_tuple_n25(_uploadFile, _downloadFile, x)));
 }
 async function to_candid_Data_n10(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Data): Promise<_Data> {
     return await to_candid_record_n11(_uploadFile, _downloadFile, value);

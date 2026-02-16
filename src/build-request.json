@@ -1,90 +1,37 @@
 {
   "kind": "build_request",
-  "title": "Separate personal records database from the Admin Panel",
+  "title": "Restore app behavior to Draft Version 8",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Create a separate backend storage boundary for “personal records” that is not shared with the Admin Panel’s record storage, and expose dedicated APIs for users to manage only their own personal records.",
-      "target": "backend",
+      "text": "Restore the application code and deployed draft behavior to match the previously working Draft Version 8 build/logic across both frontend and backend (i.e., roll back any changes introduced after Version 8 that altered runtime behavior).",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-1",
+          "msg-2"
         ],
         "quotes": [
-          "personal records database ko admin panal ke bahar rakho"
+          "version 8 sahi hai",
+          "ya"
         ]
       },
       "acceptanceCriteria": [
-        "Backend has two distinct record stores (e.g., admin-records vs personal-records) and they do not read/write the same underlying Map.",
-        "Personal-record APIs are scoped to the caller identity (Principal) so one user cannot list/read/update/delete another user’s records.",
-        "Personal-record APIs reject unauthenticated/unauthorized callers with clear errors (e.g., \"Unauthorized\").",
-        "Admin Panel APIs continue to exist and operate only on the admin record store (not personal-record store)."
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "text": "Update the frontend so the Admin Panel no longer displays or manages the personal records database; instead, implement a separate “Personal Records” experience outside the Admin Panel for signed-in users.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "personal records database ko admin panal ke bahar rakho"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Admin Panel UI only uses admin-only record queries/mutations and does not call personal-record APIs.",
-        "The non-admin area (Records view) provides a user-facing UI to view and manage the signed-in user’s personal records (list + detail + create/edit/delete) using the new personal-record APIs.",
-        "If the user is not signed in (Internet Identity), the Records view shows a clear sign-in prompt and does not show any records.",
-        "User-facing text is in English."
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "text": "Add/adjust React Query hooks and mutations to support personal-record CRUD outside the Admin Panel, with correct cache keys and optimistic/refresh behavior similar to the existing admin-record flows.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "personal records database ko admin panal ke bahar rakho"
-        ]
-      },
-      "acceptanceCriteria": [
-        "There are separate React Query cache keys for admin records and personal records (no shared cache keys).",
-        "Creating/updating a personal record immediately reflects in the personal records list and the selected detail view without requiring a manual reload.",
-        "Authorization errors for personal-record actions are handled gracefully in the UI (English messaging)."
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "If the backend data schema changes in a way that would otherwise drop or orphan existing stored records, add a conditional Motoko migration to preserve existing data into the appropriate new store(s).",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "personal records database ko admin panal ke bahar rakho"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Upgrade does not trap due to incompatible stable state changes.",
-        "Existing stored records (if any) are preserved after upgrade according to the new separation model, or explicitly moved into the intended store."
+        "After rebuild and deploy, the app’s UI flows and data/authorization behavior match the Draft Version 8 behavior as the user experienced it.",
+        "No new regressions are introduced in sign-in/sign-out flow, records CRUD (admin + personal), and admin gating versus the Version 8 baseline.",
+        "The deployed draft can be opened and used without runtime errors in the browser console."
       ]
     }
   ],
   "constraints": [
-    "Do not edit files under frontend/immutablePaths (e.g., frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui). Compose them instead.",
-    "Backend must remain a single Motoko actor in backend/main.mo; only add backend/migration.mo if required for state upgrade compatibility."
+    "Backend must remain a single Motoko actor in backend/main.mo; only add backend/migration.mo if state upgrade is necessary.",
+    "Do not edit any files under frontend/src/components/ui or any path listed in frontend.immutablePaths; compose those components instead.",
+    "Use English for any user-facing text."
   ],
   "nonGoals": [
-    "Implementing third-party authentication providers (only Internet Identity is supported).",
-    "Introducing external databases or off-chain storage.",
-    "Implementing real-time sync (WebSockets) or push notifications."
+    "Adding new product features beyond restoring Version 8 behavior.",
+    "Changing the technology stack or adding external services/integrations."
   ],
   "imageRequirements": {
     "required": [],
